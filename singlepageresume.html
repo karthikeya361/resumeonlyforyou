@@ -1,0 +1,1709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATS-Friendly Single Page Resume Builder</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #000000;
+            --secondary-color: #333333;
+            --text-color: #000000;
+            --bg-color: #ffffff;
+            --border-color: #cccccc;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            color: var(--text-color);
+        }
+
+        .main-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin: 2rem 0;
+            overflow: hidden;
+        }
+
+        .header {
+            background: var(--primary-color);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .form-section {
+            padding: 2rem;
+            background: #f8f9fa;
+        }
+
+        .preview-section {
+            padding: 2rem;
+            background: white;
+            min-height: 800px;
+        }
+
+        .resume-preview {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            padding: 1rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            font-family: 'Times New Roman', serif;
+            line-height: 1.3;
+            color: var(--text-color);
+            height: 280mm; /* A4 height */
+            width: 216mm; /* A4 width */
+            max-width: 100%;
+            margin: 0 auto;
+            overflow: hidden;
+            font-size: 11px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Flexible content container */
+        .resume-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            min-height: 100%;
+        }
+
+        .resume-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 0.5rem;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .resume-column {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            overflow: hidden;
+        }
+
+        .resume-header {
+            text-align: center;
+            border-bottom: 1.5px solid var(--primary-color);
+            padding-bottom: 0.5rem;
+            margin-bottom: 0.5rem;
+            position: relative;
+            min-height: 80px;
+            flex-shrink: 0;
+        }
+
+        .profile-photo-container {
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 80px;
+            height: 100px;
+            border: 1px solid var(--border-color);
+            border-radius: 3px;
+            overflow: hidden;
+            background: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .profile-photo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .resume-name {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 0.2rem;
+            text-transform: uppercase;
+            padding-right: 90px;
+        }
+
+        .resume-title {
+            font-size: 0.85rem;
+            color: var(--secondary-color);
+            margin-bottom: 0.2rem;
+            padding-right: 90px;
+        }
+
+        .resume-contact {
+            color: var(--text-color);
+            font-size: 0.7rem;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            padding-right: 90px;
+        }
+
+        .resume-section {
+            margin-bottom: 0.5rem;
+            break-inside: avoid;
+            page-break-inside: avoid;
+            overflow: hidden;
+        }
+
+        .resume-section-title {
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            border-bottom: 1px solid var(--primary-color);
+            padding-bottom: 0.1rem;
+            margin-bottom: 0.3rem;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .experience-item, .project-item {
+            margin-bottom: 0.4rem;
+            padding-bottom: 0.2rem;
+            font-size: 0.75rem;
+        }
+
+        .item-header {
+            margin-bottom: 0.1rem;
+        }
+
+        .item-title {
+            font-weight: bold;
+            color: var(--text-color);
+            font-size: 0.75rem;
+        }
+
+        .item-company {
+            color: var(--secondary-color);
+            font-style: italic;
+            font-size: 0.7rem;
+        }
+
+        .item-date {
+            color: var(--secondary-color);
+            font-size: 0.65rem;
+            float: right;
+        }
+
+        .skills-list {
+            list-style-type: disc;
+            margin-left: 10px;
+            margin-bottom: 0;
+            font-size: 0.7rem;
+        }
+
+        .skills-list li {
+            margin-bottom: 1px;
+            line-height: 1.1;
+        }
+
+        .education-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0.2rem;
+            font-size: 0.65rem;
+        }
+
+        .education-table th,
+        .education-table td {
+            border: 1px solid var(--border-color);
+            padding: 2px;
+            text-align: left;
+        }
+
+        .education-table th {
+            background-color: #f8f9fa;
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        /* Fixed declaration at bottom */
+        .declaration-section {
+            margin-top: auto;
+            font-size: 0.7rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 0.5rem;
+            background: white;
+            flex-shrink: 0;
+            min-height: 60px;
+        }
+
+        .signature-area {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-top: 0.5rem;
+            gap: 1rem;
+        }
+
+        .signature-box {
+            flex: 1;
+        }
+
+        .signature-line {
+            border-bottom: 1px solid var(--text-color);
+            height: 25px;
+            margin-bottom: 0.2rem;
+        }
+
+        /* Dynamic font sizing classes */
+        .font-large {
+            font-size: 12px;
+        }
+
+        .font-large .resume-name { font-size: 1.6rem; }
+        .font-large .resume-title { font-size: 1rem; }
+        .font-large .resume-contact { font-size: 0.8rem; }
+        .font-large .resume-section-title { font-size: 0.9rem; }
+        .font-large .experience-item, .font-large .project-item { font-size: 0.85rem; }
+        .font-large .item-title { font-size: 0.85rem; }
+        .font-large .item-company { font-size: 0.8rem; }
+        .font-large .item-date { font-size: 0.75rem; }
+        .font-large .skills-list { font-size: 0.8rem; }
+        .font-large .education-table { font-size: 0.75rem; }
+        .font-large .declaration-section { font-size: 0.8rem; }
+        .font-large p { font-size: 0.8rem; }
+
+        .font-medium {
+            font-size: 10px;
+        }
+
+        .font-medium .resume-name { font-size: 1.3rem; }
+        .font-medium .resume-title { font-size: 0.8rem; }
+        .font-medium .resume-contact { font-size: 0.7rem; }
+        .font-medium .resume-section-title { font-size: 0.75rem; }
+        .font-medium .experience-item, .font-medium .project-item { font-size: 0.7rem; }
+        .font-medium .item-title { font-size: 0.7rem; }
+        .font-medium .item-company { font-size: 0.65rem; }
+        .font-medium .item-date { font-size: 0.6rem; }
+        .font-medium .skills-list { font-size: 0.65rem; }
+        .font-medium .education-table { font-size: 0.6rem; }
+        .font-medium .declaration-section { font-size: 0.65rem; }
+        .font-medium p { font-size: 0.65rem; }
+
+        .font-small {
+            font-size: 9px;
+        }
+
+        .font-small .resume-name { font-size: 1.1rem; }
+        .font-small .resume-title { font-size: 0.7rem; }
+        .font-small .resume-contact { font-size: 0.6rem; }
+        .font-small .resume-section-title { font-size: 0.65rem; }
+        .font-small .experience-item, .font-small .project-item { font-size: 0.6rem; }
+        .font-small .item-title { font-size: 0.6rem; }
+        .font-small .item-company { font-size: 0.55rem; }
+        .font-small .item-date { font-size: 0.5rem; }
+        .font-small .skills-list { font-size: 0.55rem; }
+        .font-small .education-table { font-size: 0.5rem; }
+        .font-small .declaration-section { font-size: 0.55rem; }
+        .font-small p { font-size: 0.55rem; }
+
+        .font-extra-small {
+            font-size: 8px;
+        }
+
+        .font-extra-small .resume-name { font-size: 1rem; }
+        .font-extra-small .resume-title { font-size: 0.6rem; }
+        .font-extra-small .resume-contact { font-size: 0.5rem; }
+        .font-extra-small .resume-section-title { font-size: 0.55rem; }
+        .font-extra-small .experience-item, .font-extra-small .project-item { font-size: 0.5rem; }
+        .font-extra-small .item-title { font-size: 0.5rem; }
+        .font-extra-small .item-company { font-size: 0.45rem; }
+        .font-extra-small .item-date { font-size: 0.4rem; }
+        .font-extra-small .skills-list { font-size: 0.45rem; }
+        .font-extra-small .education-table { font-size: 0.4rem; }
+        .font-extra-small .declaration-section { font-size: 0.45rem; }
+        .font-extra-small p { font-size: 0.45rem; }
+
+        .photo-upload-area {
+            border: 2px dashed var(--border-color);
+            border-radius: 5px;
+            padding: 2rem;
+            text-align: center;
+            background: #f8f9fa;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .photo-upload-area:hover {
+            border-color: var(--secondary-color);
+            background: #e9ecef;
+        }
+
+        .photo-upload-area.has-image {
+            padding: 0;
+            border: none;
+            background: none;
+        }
+
+        .uploaded-photo {
+            max-width: 150px;
+            max-height: 200px;
+            border-radius: 5px;
+            border: 1px solid var(--border-color);
+        }
+
+        .remove-photo-btn {
+            margin-top: 10px;
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            font-size: 0.9rem;
+        }
+
+        .form-control:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 0.2rem rgba(0,0,0,0.1);
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            border: 1px solid var(--primary-color);
+            padding: 0.7rem 1.5rem;
+            border-radius: 5px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+
+        .btn-success {
+            background: var(--secondary-color);
+            border: 1px solid var(--secondary-color);
+            padding: 0.7rem 1.5rem;
+            border-radius: 5px;
+            font-weight: 600;
+        }
+
+        .dynamic-section {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .section-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            margin: -1rem -1rem 1rem -1rem;
+            border-radius: 5px 5px 0 0;
+            font-weight: 600;
+        }
+
+        .add-more-btn {
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+        }
+
+        .remove-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 0.3rem 0.8rem;
+            border-radius: 3px;
+            font-size: 0.8rem;
+        }
+
+        .education-type-badge {
+            background: var(--secondary-color);
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            font-size: 0.8rem;
+            margin-bottom: 0.5rem;
+            display: inline-block;
+        }
+
+        @media (max-width: 768px) {
+            .form-section, .preview-section {
+                padding: 1rem;
+            }
+            
+            .resume-contact {
+                flex-direction: column;
+                gap: 3px;
+            }
+
+            .item-date {
+                float: none;
+                display: block;
+            }
+
+            .resume-content {
+                grid-template-columns: 1fr;
+            }
+
+            .resume-name, .resume-title, .resume-contact {
+                padding-right: 0;
+            }
+
+            .profile-photo-container {
+                position: static;
+                width: 80px;
+                height: 100px;
+                margin: 0 auto 0.5rem;
+            }
+        }
+
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .resume-preview, .resume-preview * {
+                visibility: visible;
+            }
+            .resume-preview {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                box-shadow: none;
+                border: none;
+                padding: 15mm;
+            }
+        }
+
+        .resume-preview p {
+            margin-bottom: 0.2rem;
+            line-height: 1.1;
+        }
+
+        .resume-preview ul {
+            margin-bottom: 0.3rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="main-container">
+            <div class="header">
+                <h1><i class="fas fa-file-alt"></i> Single Page ATS Resume Builder</h1>
+                <p>Create your complete ATS-optimized resume on one page</p>
+            </div>
+
+            <div class="row g-0">
+                <!-- Form Section -->
+                <div class="col-lg-6 form-section">
+                    <form id="resumeForm">
+                        <!-- Photo Upload Section -->
+                        <div class="dynamic-section">
+                            <div class="section-header">
+                                <i class="fas fa-camera"></i> Profile Photo (Optional)
+                            </div>
+                            <div class="photo-upload-area" id="photoUploadArea" onclick="document.getElementById('photoInput').click()">
+                                <i class="fas fa-camera fa-2x mb-2 text-muted"></i>
+                                <p class="text-muted mb-0">Click to upload your photo</p>
+                                <small class="text-muted">Recommended size: 80x100px</small>
+                            </div>
+                            <input type="file" id="photoInput" accept="image/*" style="display: none;">
+                        </div>
+
+                        <!-- Personal Information -->
+                        <div class="dynamic-section">
+                            <div class="section-header">
+                                <i class="fas fa-user"></i> Personal Information
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Full Name *</label>
+                                    <input type="text" class="form-control" id="fullName" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Professional Title</label>
+                                    <input type="text" class="form-control" id="title" placeholder="e.g., Software Developer">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Email *</label>
+                                    <input type="email" class="form-control" id="email" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Phone</label>
+                                    <input type="tel" class="form-control" id="phone">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Location</label>
+                                    <input type="text" class="form-control" id="location" placeholder="City, Country">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">LinkedIn</label>
+                                    <input type="url" class="form-control" id="linkedin" placeholder="https://linkedin.com/in/yourprofile">
+                                </div>
+                                <div class="col-12 mb-3">
+                                    <label class="form-label">Professional Summary (Keep it brief)</label>
+                                    <textarea class="form-control" id="summary" rows="2" placeholder="2-3 lines maximum - Brief overview of your professional background"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Experience Section -->
+                        <div class="dynamic-section">
+                            <div class="section-header">
+                                <i class="fas fa-briefcase"></i> Work Experience (Max 3-4 entries)
+                            </div>
+                            <div id="experienceContainer">
+                                <div class="experience-entry border p-3 mb-3 rounded">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-2">
+                                            <label class="form-label">Job Title</label>
+                                            <input type="text" class="form-control job-title" placeholder="e.g., Senior Developer">
+                                        </div>
+                                        <div class="col-md-6 mb-2">
+                                            <label class="form-label">Company</label>
+                                            <input type="text" class="form-control company" placeholder="e.g., Tech Corp">
+                                        </div>
+                                        <div class="col-md-6 mb-2">
+                                            <label class="form-label">Start Date</label>
+                                            <input type="text" class="form-control start-date" placeholder="e.g., Jan 2020">
+                                        </div>
+                                        <div class="col-md-6 mb-2">
+                                            <label class="form-label">End Date</label>
+                                            <input type="text" class="form-control end-date" placeholder="e.g., Present">
+                                        </div>
+                                        <div class="col-12 mb-2">
+                                            <label class="form-label">Job Description (Keep brief - 2-3 lines)</label>
+                                            <textarea class="form-control job-description" rows="2" placeholder="Brief description of key responsibilities and achievements"></textarea>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="remove-btn" onclick="removeEntry(this, 'experience')">Remove</button>
+                                </div>
+                            </div>
+                            <button type="button" class="add-more-btn" onclick="addExperience()">
+                                <i class="fas fa-plus"></i> Add More Experience
+                            </button>
+                        </div>
+
+                        <!-- Education Section -->
+                        <div class="dynamic-section">
+                            <div class="section-header">
+                                <i class="fas fa-graduation-cap"></i> Education (Max 3-4 entries)
+                            </div>
+                            <div id="educationContainer">
+                                <div class="education-entry border p-3 mb-3 rounded" data-type="graduation">
+                                    <div class="education-type-badge">Graduation</div>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-2">
+                                            <label class="form-label">Degree</label>
+                                            <input type="text" class="form-control degree" placeholder="e.g., Bachelor of Science">
+                                        </div>
+                                        <div class="col-md-6 mb-2">
+                                            <label class="form-label">Field of Study</label>
+                                            <input type="text" class="form-control field" placeholder="e.g., Computer Science">
+                                        </div>
+                                        <div class="col-md-6 mb-2">
+                                            <label class="form-label">Institution</label>
+                                            <input type="text" class="form-control institution" placeholder="e.g., University Name">
+                                        </div>
+                                        <div class="col-md-6 mb-2">
+                                            <label class="form-label">Year</label>
+                                            <input type="text" class="form-control grad-year" placeholder="e.g., 2020">
+                                        </div>
+                                        <div class="col-md-6 mb-2">
+                                            <label class="form-label">Grade/Percentage</label>
+                                            <input type="text" class="form-control grade" placeholder="e.g., 3.8 GPA or 85%">
+                                        </div>
+                                    </div>
+                                    <button type="button" class="remove-btn" onclick="removeEntry(this, 'education')">Remove</button>
+                                </div>
+                            </div>
+                            <button type="button" class="add-more-btn" onclick="addEducation()">
+                                <i class="fas fa-plus"></i> Add More Education
+                            </button>
+                        </div>
+
+                        <!-- Skills Section -->
+                        <div class="dynamic-section">
+                            <div class="section-header">
+                                <i class="fas fa-cogs"></i> Skills (Keep concise)
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Technical Skills (Max 8-10 skills)</label>
+                                <textarea class="form-control" id="technicalSkills" rows="2" placeholder="JavaScript&#10;Python&#10;React&#10;Node.js"></textarea>
+                                <small class="text-muted">Enter each skill on a separate line</small>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Soft Skills (Max 6-8 skills)</label>
+                                <textarea class="form-control" id="softSkills" rows="2" placeholder="Leadership&#10;Communication&#10;Problem-solving"></textarea>
+                                <small class="text-muted">Enter each skill on a separate line</small>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Languages Known (Max 5-6 languages)</label>
+                                <textarea class="form-control" id="languages" rows="2" placeholder="English (Fluent)&#10;French (Intermediate)&#10;Japanese (Beginner)"></textarea>
+                                <small class="text-muted">Enter each language with proficiency level on a separate line</small>
+                            </div>
+                        </div>
+
+                        <!-- Projects Section -->
+                        <div class="dynamic-section">
+                            <div class="section-header">
+                                <i class="fas fa-project-diagram"></i> Projects (Max 3-4 projects)
+                            </div>
+                            <div id="projectsContainer">
+                                <div class="project-entry border p-3 mb-3 rounded">
+                                    <div class="row">
+                                        <div class="col-md-8 mb-2">
+                                            <label class="form-label">Project Name</label>
+                                            <input type="text" class="form-control project-name" placeholder="e.g., E-commerce Website">
+                                        </div>
+                                        <div class="col-md-4 mb-2">
+                                            <label class="form-label">Year</label>
+                                            <input type="text" class="form-control project-year" placeholder="e.g., 2023">
+                                        </div>
+                                        <div class="col-12 mb-2">
+                                            <label class="form-label">Description (Keep brief - 1-2 lines)</label>
+                                            <textarea class="form-control project-description" rows="1" placeholder="Brief description of the project and key technologies"></textarea>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="remove-btn" onclick="removeEntry(this, 'project')">Remove</button>
+                                </div>
+                            </div>
+                            <button type="button" class="add-more-btn" onclick="addProject()">
+                                <i class="fas fa-plus"></i> Add More Projects
+                            </button>
+                        </div>
+
+                        <!-- Additional Sections -->
+                        <div class="dynamic-section">
+                            <div class="section-header">
+                                <i class="fas fa-user-plus"></i> Additional Information (Keep minimal)
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Hobbies & Interests (Max 4-5)</label>
+                                <textarea class="form-control" id="hobbies" rows="1" placeholder="Reading&#10;Photography&#10;Traveling"></textarea>
+                                <small class="text-muted">Enter each hobby on a separate line</small>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Strengths (Max 4-5)</label>
+                                <textarea class="form-control" id="strengths" rows="1" placeholder="Quick Learner&#10;Detail Oriented&#10;Analytical Thinking"></textarea>
+                                <small class="text-muted">Enter each strength on a separate line</small>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Areas for Improvement (Max 2-3, Optional)</label>
+                                <textarea class="form-control" id="weaknesses" rows="1" placeholder="Public Speaking (Working to improve)"></textarea>
+                                <small class="text-muted">Enter each area on a separate line (Optional)</small>
+                            </div>
+                        </div>
+
+                        <!-- Declaration Section -->
+                        <div class="dynamic-section">
+                            <div class="section-header">
+                                <i class="fas fa-signature"></i> Declaration & Signature
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Declaration Text (Keep short)</label>
+                                <textarea class="form-control" id="declarationText" rows="2" placeholder="I hereby declare that all the information provided above is true to the best of my knowledge and belief."></textarea>
+                                <small class="text-muted">Leave blank to use default declaration</small>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Place</label>
+                                    <input type="text" class="form-control" id="place" placeholder="e.g., New York">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Date</label>
+                                    <input type="date" class="form-control" id="date">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="text-center mt-4">
+                            <button type="button" class="btn btn-primary me-3" onclick="generateResume()">
+                                <i class="fas fa-eye"></i> Preview Resume
+                            </button>
+                            <button type="button" class="btn btn-success" onclick="downloadResume()">
+                                <i class="fas fa-download"></i> Download Resume
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Preview Section -->
+                <div class="col-lg-6 preview-section">
+                    <h4 class="mb-3"><i class="fas fa-eye"></i> Single Page Preview</h4>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> 
+                        <strong>Single Page Optimization:</strong> Font size automatically adjusts based on content volume.
+                    </div>
+                    <div class="resume-preview" id="resumePreview">
+                        <div class="text-center text-muted">
+                            <i class="fas fa-file-alt fa-3x mb-3"></i>
+                            <p>Fill in your information to see the single-page resume preview</p>
+                            <p><small>Everything including declaration & signature will fit on one page</small></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let uploadedPhotoData = null;
+        let educationCount = 1;
+        const educationTypes = ['graduation', 'intermediate', 'schooling'];
+
+        // Photo upload handling
+        document.getElementById('photoInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    uploadedPhotoData = e.target.result;
+                    const uploadArea = document.getElementById('photoUploadArea');
+                    uploadArea.innerHTML = `
+                        <img src="${uploadedPhotoData}" alt="Profile Photo" class="uploaded-photo">
+                        <br>
+                        <button type="button" class="remove-photo-btn" onclick="removePhoto()">
+                            <i class="fas fa-trash"></i> Remove Photo
+                        </button>
+                    `;
+                    uploadArea.classList.add('has-image');
+                    generateResume();
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function removePhoto() {
+            uploadedPhotoData = null;
+            const uploadArea = document.getElementById('photoUploadArea');
+            uploadArea.innerHTML = `
+                <i class="fas fa-camera fa-2x mb-2 text-muted"></i>
+                <p class="text-muted mb-0">Click to upload your photo</p>
+                <small class="text-muted">Recommended size: 80x100px</small>
+            `;
+            uploadArea.classList.remove('has-image');
+            generateResume();
+        }
+
+        // Auto-generate preview as user types
+        document.addEventListener('input', function(e) {
+            if (e.target.closest('#resumeForm')) {
+                generateResume();
+            }
+        });
+
+        // Set today's date as default
+        document.getElementById('date').valueAsDate = new Date();
+
+        // Calculate content volume and return appropriate font class
+        function calculateContentVolume(data) {
+            let contentScore = 0;
+            
+            // Count characters in main content areas
+            if (data.summary) contentScore += data.summary.length;
+            
+            // Experience content
+            data.experience.forEach(exp => {
+                if (exp.jobTitle) contentScore += exp.jobTitle.length;
+                if (exp.company) contentScore += exp.company.length;
+                if (exp.description) contentScore += exp.description.length;
+            });
+            
+            // Skills content
+            if (data.technicalSkills) contentScore += data.technicalSkills.length;
+            if (data.softSkills) contentScore += data.softSkills.length;
+            if (data.languages) contentScore += data.languages.length;
+            
+            // Projects content
+            data.projects.forEach(project => {
+                if (project.name) contentScore += project.name.length;
+                if (project.description) contentScore += project.description.length;
+            });
+            
+            // Additional information
+            if (data.hobbies) contentScore += data.hobbies.length;
+            if (data.strengths) contentScore += data.strengths.length;
+            if (data.weaknesses) contentScore += data.weaknesses.length;
+            
+            // Count number of sections with content
+            let sectionCount = 0;
+            if (data.experience.length > 0) sectionCount++;
+            if (data.education.length > 0) sectionCount++;
+            if (data.projects.length > 0) sectionCount++;
+            if (data.technicalSkills || data.softSkills || data.languages) sectionCount++;
+            if (data.hobbies || data.strengths || data.weaknesses) sectionCount++;
+            
+            // Calculate final score including section count
+            const totalScore = contentScore + (sectionCount * 200) + (data.experience.length * 100) + (data.projects.length * 50);
+            
+            // Return font class based on content volume
+            if (totalScore < 800) return 'font-large';
+            else if (totalScore < 1500) return 'font-medium';
+            else if (totalScore < 2500) return 'font-small';
+            else return 'font-extra-small';
+        }
+
+        function generateResume() {
+            const formData = getFormData();
+            const resumeHTML = createResumeHTML(formData);
+            const resumePreview = document.getElementById('resumePreview');
+            resumePreview.innerHTML = resumeHTML;
+            
+            // Apply dynamic font sizing
+            const fontClass = calculateContentVolume(formData);
+            resumePreview.className = `resume-preview ${fontClass}`;
+        }
+
+        function getFormData() {
+            return {
+                photo: uploadedPhotoData,
+                fullName: document.getElementById('fullName').value,
+                title: document.getElementById('title').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                location: document.getElementById('location').value,
+                linkedin: document.getElementById('linkedin').value,
+                summary: document.getElementById('summary').value,
+                technicalSkills: document.getElementById('technicalSkills').value,
+                softSkills: document.getElementById('softSkills').value,
+                languages: document.getElementById('languages').value,
+                hobbies: document.getElementById('hobbies').value,
+                strengths: document.getElementById('strengths').value,
+                weaknesses: document.getElementById('weaknesses').value,
+                declarationText: document.getElementById('declarationText').value,
+                place: document.getElementById('place').value,
+                date: document.getElementById('date').value,
+                experience: getExperienceData(),
+                education: getEducationData(),
+                projects: getProjectsData()
+            };
+        }
+
+        function getExperienceData() {
+            const experiences = [];
+            document.querySelectorAll('.experience-entry').forEach(entry => {
+                const exp = {
+                    jobTitle: entry.querySelector('.job-title').value,
+                    company: entry.querySelector('.company').value,
+                    startDate: entry.querySelector('.start-date').value,
+                    endDate: entry.querySelector('.end-date').value,
+                    description: entry.querySelector('.job-description').value
+                };
+                if (exp.jobTitle || exp.company) {
+                    experiences.push(exp);
+                }
+            });
+            return experiences;
+        }
+
+        function getEducationData() {
+            const education = [];
+            document.querySelectorAll('.education-entry').forEach(entry => {
+                const edu = {
+                    type: entry.getAttribute('data-type'),
+                    degree: entry.querySelector('.degree').value,
+                    field: entry.querySelector('.field').value,
+                    institution: entry.querySelector('.institution').value,
+                    year: entry.querySelector('.grad-year').value,
+                    grade: entry.querySelector('.grade').value
+                };
+                if (edu.degree || edu.institution) {
+                    education.push(edu);
+                }
+            });
+            return education;
+        }
+
+        function getProjectsData() {
+            const projects = [];
+            document.querySelectorAll('.project-entry').forEach(entry => {
+                const project = {
+                    name: entry.querySelector('.project-name').value,
+                    year: entry.querySelector('.project-year').value,
+                    description: entry.querySelector('.project-description').value
+                };
+                if (project.name) {
+                    projects.push(project);
+                }
+            });
+            return projects;
+        }
+
+        function createResumeHTML(data) {
+            let html = '';
+            
+            // Main container with flex layout
+            html += `<div class="resume-container">`;
+            
+            // Header with photo
+            html += `<div class="resume-header">`;
+            
+            // Profile photo container
+            if (data.photo) {
+                html += `<div class="profile-photo-container">`;
+                html += `<img src="${data.photo}" alt="Profile Photo" class="profile-photo">`;
+                html += `</div>`;
+            } else {
+                html += `<div class="profile-photo-container">`;
+                html += `<i class="fas fa-user fa-2x text-muted"></i>`;
+                html += `</div>`;
+            }
+            
+            if (data.fullName) {
+                html += `<div class="resume-name">${data.fullName}</div>`;
+            }
+            if (data.title) html += `<div class="resume-title">${data.title}</div>`;
+            
+            let contactInfo = [];
+            if (data.email) contactInfo.push(data.email);
+            if (data.phone) contactInfo.push(data.phone);
+            if (data.location) contactInfo.push(data.location);
+            if (data.linkedin) contactInfo.push('LinkedIn Profile');
+            
+            if (contactInfo.length > 0) {
+                html += `<div class="resume-contact">`;
+                contactInfo.forEach((contact, index) => {
+                    html += `<span>${contact}</span>`;
+                    if (index < contactInfo.length - 1) html += `<span>•</span>`;
+                });
+                html += `</div>`;
+            }
+            html += `</div>`;
+
+            // Two-column content
+            html += `<div class="resume-content">`;
+            
+            // Left Column
+            html += `<div class="resume-column">`;
+            
+            // Summary
+            if (data.summary) {
+                html += `<div class="resume-section">`;
+                html += `<div class="resume-section-title">Professional Summary</div>`;
+                html += `<p>${data.summary}</p>`;
+                html += `</div>`;
+            }
+
+            // Experience
+            if (data.experience && data.experience.length > 0) {
+                html += `<div class="resume-section">`;
+                html += `<div class="resume-section-title">Work Experience</div>`;
+                data.experience.slice(0, 4).forEach(exp => {
+                    if (exp.jobTitle || exp.company) {
+                        html += `<div class="experience-item">`;
+                        html += `<div class="item-header">`;
+                        if (exp.jobTitle) html += `<div class="item-title">${exp.jobTitle}</div>`;
+                        if (exp.startDate || exp.endDate) {
+                            html += `<div class="item-date">${exp.startDate}${exp.endDate ? ' - ' + exp.endDate : ''}</div>`;
+                        }
+                        html += `</div>`;
+                        if (exp.company) html += `<div class="item-company">${exp.company}</div>`;
+                        if (exp.description) {
+                            html += `<p>${exp.description}</p>`;
+                        }
+                        html += `</div>`;
+                    }
+                });
+                html += `</div>`;
+            }
+
+            // Skills
+            if (data.technicalSkills || data.softSkills || data.languages) {
+                html += `<div class="resume-section">`;
+                html += `<div class="resume-section-title">Skills</div>`;
+                
+                if (data.technicalSkills) {
+                    html += `<div style="margin-bottom: 0.4rem;">`;
+                    html += `<strong>Technical Skills:</strong>`;
+                    html += `<ul class="skills-list">`;
+                    data.technicalSkills.split('\n').slice(0, 10).forEach(skill => {
+                        if (skill.trim()) {
+                            html += `<li>${skill.trim()}</li>`;
+                        }
+                    });
+                    html += `</ul>`;
+                    html += `</div>`;
+                }
+                
+                if (data.softSkills) {
+                    html += `<div style="margin-bottom: 0.4rem;">`;
+                    html += `<strong>Soft Skills:</strong>`;
+                    html += `<ul class="skills-list">`;
+                    data.softSkills.split('\n').slice(0, 8).forEach(skill => {
+                        if (skill.trim()) {
+                            html += `<li>${skill.trim()}</li>`;
+                        }
+                    });
+                    html += `</ul>`;
+                    html += `</div>`;
+                }
+                
+                if (data.languages) {
+                    html += `<div>`;
+                    html += `<strong>Languages:</strong>`;
+                    html += `<ul class="skills-list">`;
+                    data.languages.split('\n').slice(0, 6).forEach(language => {
+                        if (language.trim()) {
+                            html += `<li>${language.trim()}</li>`;
+                        }
+                    });
+                    html += `</ul>`;
+                    html += `</div>`;
+                }
+                html += `</div>`;
+            }
+
+            html += `</div>`; // End left column
+
+            // Right Column
+            html += `<div class="resume-column">`;
+
+            // Education (Compact Table Format)
+            if (data.education && data.education.length > 0) {
+                html += `<div class="resume-section">`;
+                html += `<div class="resume-section-title">Education</div>`;
+                html += `<table class="education-table">`;
+                html += `<thead>`;
+                html += `<tr>`;
+                html += `<th>Level</th>`;
+                html += `<th>Course</th>`;
+                html += `<th>Institution</th>`;
+                html += `<th>Year</th>`;
+                html += `<th>Grade</th>`;
+                html += `</tr>`;
+                html += `</thead>`;
+                html += `<tbody>`;
+                data.education.slice(0, 4).forEach(edu => {
+                    if (edu.degree || edu.institution) {
+                        html += `<tr>`;
+                        html += `<td>${edu.type.charAt(0).toUpperCase() + edu.type.slice(1)}</td>`;
+                        html += `<td>${edu.degree || '-'}</td>`;
+                        html += `<td>${edu.institution || '-'}</td>`;
+                        html += `<td>${edu.year || '-'}</td>`;
+                        html += `<td>${edu.grade || '-'}</td>`;
+                        html += `</tr>`;
+                    }
+                });
+                html += `</tbody>`;
+                html += `</table>`;
+                html += `</div>`;
+            }
+
+            // Projects
+            if (data.projects && data.projects.length > 0) {
+                html += `<div class="resume-section">`;
+                html += `<div class="resume-section-title">Projects</div>`;
+                data.projects.slice(0, 4).forEach(project => {
+                    if (project.name) {
+                        html += `<div class="project-item">`;
+                        html += `<div class="item-header">`;
+                        html += `<div class="item-title">${project.name}</div>`;
+                        if (project.year) html += `<div class="item-date">${project.year}</div>`;
+                        html += `</div>`;
+                        if (project.description) {
+                            html += `<p>${project.description}</p>`;
+                        }
+                        html += `</div>`;
+                    }
+                });
+                html += `</div>`;
+            }
+
+            // Additional Information (Compact)
+            if (data.hobbies || data.strengths || data.weaknesses) {
+                html += `<div class="resume-section">`;
+                html += `<div class="resume-section-title">Additional Information</div>`;
+                
+                if (data.hobbies) {
+                    html += `<div style="margin-bottom: 0.3rem;">`;
+                    html += `<strong>Hobbies:</strong>`;
+                    html += `<ul class="skills-list">`;
+                    data.hobbies.split('\n').slice(0, 5).forEach(hobby => {
+                        if (hobby.trim()) {
+                            html += `<li>${hobby.trim()}</li>`;
+                        }
+                    });
+                    html += `</ul>`;
+                    html += `</div>`;
+                }
+                
+                if (data.strengths) {
+                    html += `<div style="margin-bottom: 0.3rem;">`;
+                    html += `<strong>Strengths:</strong>`;
+                    html += `<ul class="skills-list">`;
+                    data.strengths.split('\n').slice(0, 5).forEach(strength => {
+                        if (strength.trim()) {
+                            html += `<li>${strength.trim()}</li>`;
+                        }
+                    });
+                    html += `</ul>`;
+                    html += `</div>`;
+                }
+                
+                if (data.weaknesses) {
+                    html += `<div>`;
+                    html += `<strong>Areas for Improvement:</strong>`;
+                    html += `<ul class="skills-list">`;
+                    data.weaknesses.split('\n').slice(0, 3).forEach(weakness => {
+                        if (weakness.trim()) {
+                            html += `<li>${weakness.trim()}</li>`;
+                        }
+                    });
+                    html += `</ul>`;
+                    html += `</div>`;
+                }
+                html += `</div>`;
+            }
+
+            html += `</div>`; // End right column
+            html += `</div>`; // End resume-content
+
+            // Declaration and Signature (At bottom using margin-top: auto)
+            const defaultDeclaration = "I hereby declare that all the information provided above is true to the best of my knowledge and belief.";
+            const declarationText = data.declarationText || defaultDeclaration;
+            
+            html += `<div class="declaration-section">`;
+            html += `<div class="resume-section-title">Declaration</div>`;
+            html += `<p>${declarationText}</p>`;
+            
+            html += `<div class="signature-area">`;
+            html += `<div class="signature-box">`;
+            if (data.place) html += `<strong>Place:</strong> ${data.place}`;
+            html += `</div>`;
+            html += `<div class="signature-box">`;
+            if (data.date) {
+                const formattedDate = new Date(data.date).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+                html += `<strong>Date:</strong> ${formattedDate}`;
+            }
+            html += `</div>`;
+            html += `</div>`;
+            
+            html += `<div class="signature-area">`;
+            html += `<div class="signature-box">`;
+            html += `<div class="signature-line"></div>`;
+            html += `<small>Signature</small>`;
+            html += `</div>`;
+            html += `<div class="signature-box">`;
+            html += `<div class="signature-line"></div>`;
+            if (data.fullName) {
+                html += `<small>${data.fullName}</small>`;
+            } else {
+                html += `<small>Full Name</small>`;
+            }
+            html += `</div>`;
+            html += `</div>`;
+            html += `</div>`;
+            
+            html += `</div>`; // End resume-container
+
+            return html || `<div class="text-center text-muted">
+                <i class="fas fa-file-alt fa-3x mb-3"></i>
+                <p>Fill in your information to see the single-page resume preview</p>
+                <p><small>Everything including declaration & signature will fit on one page</small></p>
+            </div>`;
+        }
+
+        function addExperience() {
+            const container = document.getElementById('experienceContainer');
+            const currentEntries = container.querySelectorAll('.experience-entry').length;
+            
+            if (currentEntries >= 4) {
+                alert('Maximum 4 experience entries recommended for single page layout');
+                return;
+            }
+            
+            const newEntry = document.createElement('div');
+            newEntry.className = 'experience-entry border p-3 mb-3 rounded';
+            newEntry.innerHTML = `
+                <div class="row">
+                    <div class="col-md-6 mb-2">
+                        <label class="form-label">Job Title</label>
+                        <input type="text" class="form-control job-title" placeholder="e.g., Senior Developer">
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <label class="form-label">Company</label>
+                        <input type="text" class="form-control company" placeholder="e.g., Tech Corp">
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <label class="form-label">Start Date</label>
+                        <input type="text" class="form-control start-date" placeholder="e.g., Jan 2020">
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <label class="form-label">End Date</label>
+                        <input type="text" class="form-control end-date" placeholder="e.g., Present">
+                    </div>
+                    <div class="col-12 mb-2">
+                        <label class="form-label">Job Description (Keep brief - 2-3 lines)</label>
+                        <textarea class="form-control job-description" rows="2" placeholder="Brief description of key responsibilities and achievements"></textarea>
+                    </div>
+                </div>
+                <button type="button" class="remove-btn" onclick="removeEntry(this, 'experience')">Remove</button>
+            `;
+            container.appendChild(newEntry);
+        }
+
+        function addEducation() {
+            const container = document.getElementById('educationContainer');
+            const currentEntries = container.querySelectorAll('.education-entry').length;
+            
+            if (currentEntries >= 4) {
+                alert('Maximum 4 education entries recommended for single page layout');
+                return;
+            }
+            
+            const newEntry = document.createElement('div');
+            
+            let educationType = educationTypes[educationCount % educationTypes.length];
+            let educationLabel = educationType.charAt(0).toUpperCase() + educationType.slice(1);
+            
+            newEntry.className = 'education-entry border p-3 mb-3 rounded';
+            newEntry.setAttribute('data-type', educationType);
+            
+            let placeholders = getEducationPlaceholders(educationType);
+            
+            newEntry.innerHTML = `
+                <div class="education-type-badge">${educationLabel}</div>
+                <div class="row">
+                    <div class="col-md-6 mb-2">
+                        <label class="form-label">${placeholders.degreeLabel}</label>
+                        <input type="text" class="form-control degree" placeholder="${placeholders.degreePlaceholder}">
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <label class="form-label">Field of Study</label>
+                        <input type="text" class="form-control field" placeholder="${placeholders.fieldPlaceholder}">
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <label class="form-label">Institution</label>
+                        <input type="text" class="form-control institution" placeholder="${placeholders.institutionPlaceholder}">
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <label class="form-label">Year</label>
+                        <input type="text" class="form-control grad-year" placeholder="${placeholders.yearPlaceholder}">
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <label class="form-label">Grade/Percentage</label>
+                        <input type="text" class="form-control grade" placeholder="${placeholders.gradePlaceholder}">
+                    </div>
+                </div>
+                <button type="button" class="remove-btn" onclick="removeEntry(this, 'education')">Remove</button>
+            `;
+            container.appendChild(newEntry);
+            educationCount++;
+        }
+
+        function getEducationPlaceholders(type) {
+            switch(type) {
+                case 'graduation':
+                    return {
+                        degreeLabel: 'Degree',
+                        degreePlaceholder: 'e.g., Bachelor of Science',
+                        fieldPlaceholder: 'e.g., Computer Science',
+                        institutionPlaceholder: 'e.g., University Name',
+                        yearPlaceholder: 'e.g., 2020',
+                        gradePlaceholder: 'e.g., 3.8 GPA or 85%'
+                    };
+                case 'intermediate':
+                    return {
+                        degreeLabel: 'Course',
+                        degreePlaceholder: 'e.g., 12th Grade / HSC',
+                        fieldPlaceholder: 'e.g., Science/Commerce/Arts',
+                        institutionPlaceholder: 'e.g., College Name',
+                        yearPlaceholder: 'e.g., 2018',
+                        gradePlaceholder: 'e.g., 90% or A Grade'
+                    };
+                case 'schooling':
+                    return {
+                        degreeLabel: 'Course',
+                        degreePlaceholder: 'e.g., 10th Grade / SSC',
+                        fieldPlaceholder: 'e.g., General',
+                        institutionPlaceholder: 'e.g., School Name',
+                        yearPlaceholder: 'e.g., 2016',
+                        gradePlaceholder: 'e.g., 95% or A+ Grade'
+                    };
+                default:
+                    return {
+                        degreeLabel: 'Degree',
+                        degreePlaceholder: 'e.g., Course Name',
+                        fieldPlaceholder: 'e.g., Field of Study',
+                        institutionPlaceholder: 'e.g., Institution Name',
+                        yearPlaceholder: 'e.g., Year',
+                        gradePlaceholder: 'e.g., Grade/Percentage'
+                    };
+            }
+        }
+
+        function addProject() {
+            const container = document.getElementById('projectsContainer');
+            const currentEntries = container.querySelectorAll('.project-entry').length;
+            
+            if (currentEntries >= 4) {
+                alert('Maximum 4 project entries recommended for single page layout');
+                return;
+            }
+            
+            const newEntry = document.createElement('div');
+            newEntry.className = 'project-entry border p-3 mb-3 rounded';
+            newEntry.innerHTML = `
+                <div class="row">
+                    <div class="col-md-8 mb-2">
+                        <label class="form-label">Project Name</label>
+                        <input type="text" class="form-control project-name" placeholder="e.g., E-commerce Website">
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <label class="form-label">Year</label>
+                        <input type="text" class="form-control project-year" placeholder="e.g., 2023">
+                    </div>
+                    <div class="col-12 mb-2">
+                        <label class="form-label">Description (Keep brief - 1-2 lines)</label>
+                        <textarea class="form-control project-description" rows="1" placeholder="Brief description of the project and key technologies"></textarea>
+                    </div>
+                </div>
+                <button type="button" class="remove-btn" onclick="removeEntry(this, 'project')">Remove</button>
+            `;
+            container.appendChild(newEntry);
+        }
+
+        function removeEntry(button, type) {
+            const entry = button.closest(`.${type}-entry`);
+            entry.remove();
+            generateResume();
+        }
+
+        function downloadResume() {
+            const resumeContent = document.getElementById('resumePreview');
+            const fullName = document.getElementById('fullName').value || 'ATS_Resume';
+            const formData = getFormData();
+            const fontClass = calculateContentVolume(formData);
+            
+            // Create a new window with the resume content
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>${fullName} - ATS Single Page Resume</title>
+                    <style>
+                        @page {
+                            size: A4;
+                            margin: 15mm;
+                        }
+                        
+                        body {
+                            font-family: 'Times New Roman', serif;
+                            line-height: 1.3;
+                            margin: 0;
+                            padding: 0;
+                            color: #000000;
+                            background: white;
+                            font-size: 11px;
+                            height: 100vh;
+                            position: relative;
+                        }
+                        
+                        .resume-container {
+                            display: flex;
+                            flex-direction: column;
+                            height: 100%;
+                            min-height: 100%;
+                        }
+
+                        .resume-content {
+                            display: grid;
+                            grid-template-columns: 1fr 1fr;
+                            gap: 1rem;
+                            margin-top: 0.5rem;
+                            flex: 1;
+                            overflow: hidden;
+                        }
+
+                        .resume-column {
+                            display: flex;
+                            flex-direction: column;
+                            gap: 0.5rem;
+                            overflow: hidden;
+                        }
+
+                        .resume-header {
+                            text-align: center;
+                            border-bottom: 1.5px solid #000000;
+                            padding-bottom: 0.5rem;
+                            margin-bottom: 0.5rem;
+                            position: relative;
+                            min-height: 80px;
+                            flex-shrink: 0;
+                        }
+
+                        .profile-photo-container {
+                            position: absolute;
+                            right: 0;
+                            top: 0;
+                            width: 80px;
+                            height: 100px;
+                            border: 1px solid #cccccc;
+                            border-radius: 3px;
+                            overflow: hidden;
+                            background: #f8f9fa;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                        }
+
+                        .profile-photo {
+                            width: 100%;
+                            height: 100%;
+                            object-fit: cover;
+                        }
+
+                        .resume-name {
+                            font-size: 1.4rem;
+                            font-weight: bold;
+                            color: #000000;
+                            margin-bottom: 0.2rem;
+                            text-transform: uppercase;
+                            padding-right: 90px;
+                        }
+
+                        .resume-title {
+                            font-size: 0.85rem;
+                            color: #333333;
+                            margin-bottom: 0.2rem;
+                            padding-right: 90px;
+                        }
+
+                        .resume-contact {
+                            color: #000000;
+                            font-size: 0.7rem;
+                            display: flex;
+                            flex-wrap: wrap;
+                            justify-content: center;
+                            gap: 8px;
+                            padding-right: 90px;
+                        }
+
+                        .resume-section {
+                            margin-bottom: 0.5rem;
+                            break-inside: avoid;
+                            page-break-inside: avoid;
+                            overflow: hidden;
+                        }
+
+                        .resume-section-title {
+                            font-size: 0.8rem;
+                            font-weight: bold;
+                            color: #000000;
+                            border-bottom: 1px solid #000000;
+                            padding-bottom: 0.1rem;
+                            margin-bottom: 0.3rem;
+                            text-transform: uppercase;
+                            letter-spacing: 0.3px;
+                        }
+
+                        .experience-item, .project-item {
+                            margin-bottom: 0.4rem;
+                            padding-bottom: 0.2rem;
+                            font-size: 0.75rem;
+                        }
+
+                        .item-header {
+                            margin-bottom: 0.1rem;
+                        }
+
+                        .item-title {
+                            font-weight: bold;
+                            color: #000000;
+                            font-size: 0.75rem;
+                        }
+
+                        .item-company {
+                            color: #333333;
+                            font-style: italic;
+                            font-size: 0.7rem;
+                        }
+
+                        .item-date {
+                            color: #333333;
+                            font-size: 0.65rem;
+                            float: right;
+                        }
+
+                        .skills-list {
+                            list-style-type: disc;
+                            margin-left: 10px;
+                            margin-bottom: 0;
+                            font-size: 0.7rem;
+                        }
+
+                        .skills-list li {
+                            margin-bottom: 1px;
+                            line-height: 1.1;
+                        }
+
+                        .education-table {
+                            width: 100%;
+                            border-collapse: collapse;
+                            margin-top: 0.2rem;
+                            font-size: 0.65rem;
+                        }
+
+                        .education-table th,
+                        .education-table td {
+                            border: 1px solid #cccccc;
+                            padding: 2px;
+                            text-align: left;
+                        }
+
+                        .education-table th {
+                            background-color: #f8f9fa;
+                            color: #000000;
+                            font-weight: bold;
+                        }
+
+                        .declaration-section {
+                            margin-top: auto;
+                            font-size: 0.7rem;
+                            border-top: 1px solid #cccccc;
+                            padding-top: 0.5rem;
+                            background: white;
+                            flex-shrink: 0;
+                            min-height: 60px;
+                        }
+
+                        .signature-area {
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: flex-end;
+                            margin-top: 0.5rem;
+                            gap: 1rem;
+                        }
+
+                        .signature-box {
+                            flex: 1;
+                        }
+
+                        .signature-line {
+                            border-bottom: 1px solid #000000;
+                            height: 25px;
+                            margin-bottom: 0.2rem;
+                        }
+
+                        p {
+                            margin-bottom: 0.2rem;
+                            line-height: 1.1;
+                        }
+
+                        ul {
+                            margin-bottom: 0.3rem;
+                        }
+
+                        /* Dynamic font sizing for print */
+                        .font-large {
+                            font-size: 12px;
+                        }
+
+                        .font-large .resume-name { font-size: 1.6rem; }
+                        .font-large .resume-title { font-size: 1rem; }
+                        .font-large .resume-contact { font-size: 0.8rem; }
+                        .font-large .resume-section-title { font-size: 0.9rem; }
+                        .font-large .experience-item, .font-large .project-item { font-size: 0.85rem; }
+                        .font-large .item-title { font-size: 0.85rem; }
+                        .font-large .item-company { font-size: 0.8rem; }
+                        .font-large .item-date { font-size: 0.75rem; }
+                        .font-large .skills-list { font-size: 0.8rem; }
+                        .font-large .education-table { font-size: 0.75rem; }
+                        .font-large .declaration-section { font-size: 0.8rem; }
+                        .font-large p { font-size: 0.8rem; }
+
+                        .font-medium {
+                            font-size: 10px;
+                        }
+
+                        .font-medium .resume-name { font-size: 1.3rem; }
+                        .font-medium .resume-title { font-size: 0.8rem; }
+                        .font-medium .resume-contact { font-size: 0.7rem; }
+                        .font-medium .resume-section-title { font-size: 0.75rem; }
+                        .font-medium .experience-item, .font-medium .project-item { font-size: 0.7rem; }
+                        .font-medium .item-title { font-size: 0.7rem; }
+                        .font-medium .item-company { font-size: 0.65rem; }
+                        .font-medium .item-date { font-size: 0.6rem; }
+                        .font-medium .skills-list { font-size: 0.65rem; }
+                        .font-medium .education-table { font-size: 0.6rem; }
+                        .font-medium .declaration-section { font-size: 0.65rem; }
+                        .font-medium p { font-size: 0.65rem; }
+
+                        .font-small {
+                            font-size: 9px;
+                        }
+
+                        .font-small .resume-name { font-size: 1.1rem; }
+                        .font-small .resume-title { font-size: 0.7rem; }
+                        .font-small .resume-contact { font-size: 0.6rem; }
+                        .font-small .resume-section-title { font-size: 0.65rem; }
+                        .font-small .experience-item, .font-small .project-item { font-size: 0.6rem; }
+                        .font-small .item-title { font-size: 0.6rem; }
+                        .font-small .item-company { font-size: 0.55rem; }
+                        .font-small .item-date { font-size: 0.5rem; }
+                        .font-small .skills-list { font-size: 0.55rem; }
+                        .font-small .education-table { font-size: 0.5rem; }
+                        .font-small .declaration-section { font-size: 0.55rem; }
+                        .font-small p { font-size: 0.55rem; }
+
+                        .font-extra-small {
+                            font-size: 8px;
+                        }
+
+                        .font-extra-small .resume-name { font-size: 1rem; }
+                        .font-extra-small .resume-title { font-size: 0.6rem; }
+                        .font-extra-small .resume-contact { font-size: 0.5rem; }
+                        .font-extra-small .resume-section-title { font-size: 0.55rem; }
+                        .font-extra-small .experience-item, .font-extra-small .project-item { font-size: 0.5rem; }
+                        .font-extra-small .item-title { font-size: 0.5rem; }
+                        .font-extra-small .item-company { font-size: 0.45rem; }
+                        .font-extra-small .item-date { font-size: 0.4rem; }
+                        .font-extra-small .skills-list { font-size: 0.45rem; }
+                        .font-extra-small .education-table { font-size: 0.4rem; }
+                        .font-extra-small .declaration-section { font-size: 0.45rem; }
+                        .font-extra-small p { font-size: 0.45rem; }
+
+                        @media print {
+                            body { 
+                                print-color-adjust: exact;
+                                -webkit-print-color-adjust: exact;
+                            }
+                        }
+                    </style>
+                </head>
+                <body class="${fontClass}">
+                    ${resumeContent.innerHTML}
+                </body>
+                </html>
+            `);
+            
+            printWindow.document.close();
+            
+            // Wait for content to load then print
+            setTimeout(() => {
+                printWindow.print();
+                printWindow.close();
+            }, 250);
+        }
+    </script>
+</body>
+</html>
